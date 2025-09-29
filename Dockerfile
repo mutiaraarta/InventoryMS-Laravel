@@ -1,31 +1,30 @@
-# Gunakan PHP 7.3 dengan Apache
-FROM php:7.3-apache
+FROM php:7.3-cli
 
-# Install ekstensi yang dibutuhkan Laravel
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    git unzip libzip-dev zip libpng-dev \
-    && docker-php-ext-install pdo pdo_mysql zip gd
-
-# Aktifkan Apache mod_rewrite (supaya routing Laravel jalan)
-RUN a2enmod rewrite
-
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+    unzip \
+    git \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    curl \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Set working directory
-WORKDIR /var/www/html
+WORKDIR /var/www
 
-# Copy semua file project
-COPY . .
+# Copy project files
+COPY . /var/www
 
-# Install dependencies via composer
+# Install composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permission supaya Laravel bisa nulis ke storage & cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Expose port
+EXPOSE 8000
 
-# Expose port 80
-EXPOSE 80
-
-# Jalankan Apache
-CMD ["apache2-foreground"]
+# Jalankan Laravel pakai artisan serve
+CMD php artisan serve --host=0.0.0.0 --port=${PORT}
