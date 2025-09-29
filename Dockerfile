@@ -2,14 +2,7 @@ FROM php:7.3-cli
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    unzip \
-    git \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    zip \
-    curl \
+    unzip git libpng-dev libonig-dev libxml2-dev libzip-dev zip curl \
     && docker-php-ext-configure zip \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
@@ -28,5 +21,5 @@ RUN composer install --no-dev --optimize-autoloader
 # Expose port
 EXPOSE 8000
 
-# Jalankan Laravel pakai artisan serve
+# Run Laravel with artisan serve
 CMD php artisan serve --host=0.0.0.0 --port=${PORT}
